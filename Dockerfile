@@ -1,9 +1,9 @@
-FROM debian:stretch AS builder
+FROM debian:bullseye AS builder
 MAINTAINER "Cédric Verstraeten" <hello@cedric.ws>
 
 ARG APP_ENV=master
 ENV APP_ENV ${APP_ENV}
-ARG PHP_VERSION=7.1
+ARG PHP_VERSION=7.4
 ARG FFMPEG_VERSION=3.1
 
 #################################
@@ -23,19 +23,29 @@ ENV DEBIAN_FRONTEND noninteractive
 # Install software requirements
 
 RUN apt-get update && apt-get install -y apt-transport-https wget lsb-release && \
-wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg && \
-echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
-apt -y update && \
-apt -y install software-properties-common libssl-dev git supervisor curl \
+apt-get install -y software-properties-common libssl-dev git supervisor curl \
 subversion libcurl4-openssl-dev cmake dh-autoreconf autotools-dev autoconf automake gcc g++ \
-build-essential libtool make nasm zlib1g-dev tar apt-transport-https \
-ca-certificates wget nginx php${PHP_VERSION}-cli php${PHP_VERSION}-gd php${PHP_VERSION}-mcrypt php${PHP_VERSION}-curl \
-php${PHP_VERSION}-mbstring php${PHP_VERSION}-dom php${PHP_VERSION}-zip php${PHP_VERSION}-fpm pwgen && \
-curl -sL https://deb.nodesource.com/setup_9.x | bash - && apt-get install -y nodejs npm
+build-essential libtool make nasm zlib1g-dev tar \
+ca-certificates nginx
 
-RUN wget http://www.nasm.us/pub/nasm/releasebuilds/2.13.01/nasm-2.13.01.tar.bz2 && \
-tar xjvf nasm-2.13.01.tar.bz2  && \
-cd nasm-2.13.01  && \
+RUN apt-get update && apt-get install -y \
+php${PHP_VERSION}-cli php${PHP_VERSION}-gd php${PHP_VERSION}-curl \
+php${PHP_VERSION}-mbstring php${PHP_VERSION}-dom php${PHP_VERSION}-zip php${PHP_VERSION}-fpm pwgen
+
+# RUN curl -sL https://deb.nodesource.com/setup_9.x | bash - && apt-get install -y nodejs npm
+
+# ARG NASM_VERSION=2.15.05
+# RUN wget http://www.nasm.us/pub/nasm/releasebuilds/${NASM_VERSION}/nasm-${NASM_VERSION}.tar.bz2 && \
+# tar xjvf nasm-${NASM_VERSION}.bz2  && \
+# cd nasm-${NASM_VERSION}  && \
+# ./autogen.sh  && \
+# ./configure  && \
+# make  && \
+# make install
+
+RUN wget http://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.bz2 && \
+tar xjvf nasm-2.15.05.tar.bz2  && \
+cd nasm-2.15.05  && \
 ./autogen.sh  && \
 ./configure  && \
 make  && \
@@ -119,7 +129,7 @@ RUN cp /usr/local/bin/ffmpeg ./usr/bin/ffmpeg
 RUN ldd /usr/bin/kerberosio | tr -s '[:blank:]' '\n' | grep '^/' | \
     xargs -I % sh -c 'mkdir -p $(dirname ./%); cp % ./%;'
 
-FROM debian:stretch-slim
+FROM debian:bullseye-slim
 
 #################################
 # Copy files from previous images
@@ -154,9 +164,9 @@ RUN chmod -R 777 /var/www/web/bootstrap/cache/ && \
 ######################
 # INSTALL PHP
 
-ARG PHP_VERSION=7.1
+ARG PHP_VERSION=7.4
 
-RUN  apt -y install php${PHP_VERSION}-cli php${PHP_VERSION}-gd php${PHP_VERSION}-mcrypt php${PHP_VERSION}-curl \
+RUN  apt -y install php${PHP_VERSION}-cli php${PHP_VERSION}-gd php${PHP_VERSION}-curl \
 php${PHP_VERSION}-mbstring php${PHP_VERSION}-dom php${PHP_VERSION}-zip php${PHP_VERSION}-fpm
 
 ########################################
