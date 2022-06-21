@@ -4,6 +4,7 @@ MAINTAINER "Cédric Verstraeten" <hello@cedric.ws>
 ARG APP_ENV=master
 ENV APP_ENV ${APP_ENV}
 ARG PHP_VERSION=7.4
+ARG NASM_VERSION=2.15.05
 ARG FFMPEG_VERSION=3.1
 
 #################################
@@ -26,32 +27,20 @@ RUN apt-get update && apt-get install -y apt-transport-https wget lsb-release &&
 apt-get install -y software-properties-common libssl-dev git supervisor curl \
 subversion libcurl4-openssl-dev cmake dh-autoreconf autotools-dev autoconf automake gcc g++ \
 build-essential libtool make nasm zlib1g-dev tar \
-ca-certificates nginx
-
-RUN apt-get update && apt-get install -y \
+ca-certificates nginx \
 php${PHP_VERSION}-cli php${PHP_VERSION}-gd php${PHP_VERSION}-curl \
 php${PHP_VERSION}-mbstring php${PHP_VERSION}-dom php${PHP_VERSION}-zip php${PHP_VERSION}-fpm pwgen
 
 # RUN curl -sL https://deb.nodesource.com/setup_9.x | bash - && apt-get install -y nodejs npm
 
-# ARG NASM_VERSION=2.15.05
-# RUN wget http://www.nasm.us/pub/nasm/releasebuilds/${NASM_VERSION}/nasm-${NASM_VERSION}.tar.bz2 && \
-# tar xjvf nasm-${NASM_VERSION}.bz2  && \
-# cd nasm-${NASM_VERSION}  && \
-# ./autogen.sh  && \
-# ./configure  && \
-# make  && \
-# make install
-
-RUN wget http://www.nasm.us/pub/nasm/releasebuilds/2.15.05/nasm-2.15.05.tar.bz2 && \
-tar xjvf nasm-2.15.05.tar.bz2  && \
-cd nasm-2.15.05  && \
+RUN wget http://www.nasm.us/pub/nasm/releasebuilds/${NASM_VERSION}/nasm-${NASM_VERSION}.tar.bz2 && \
+tar xjvf nasm-${NASM_VERSION}.bz2  && \
+cd nasm-${NASM_VERSION}  && \
 ./autogen.sh  && \
 ./configure  && \
 make  && \
-make install
-
-RUN apt-get install nasm
+make install && \
+apt-get install nasm
 
 ############################
 # Clone and build x264
